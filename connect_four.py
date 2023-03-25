@@ -2,9 +2,24 @@ import numpy as np
 from numpy import ndarray
 from typing import Optional
 from itertools import groupby
+from python_ta.contracts import check_contracts
 
 
+@check_contracts
 class ConnectFour:
+    """Represents the state of a Connect Four game.
+
+    Instance Attributes:
+    - board: a numpy ndarray storing the current board state. Each position stores 0 if the space is unoccupied,
+             1 if occupied by player 1 and 2 if occupied by player 2.
+    - moves: a list of tuples storing the coordinates of player moves in the format (player_move_x, player_move_y).
+    - x: the width of the board
+    - y: the height of the board
+
+    Representation Invariants:
+    - x >= 5
+    - y >= 5
+    """
     board: ndarray
     moves: list[tuple]
 
@@ -13,6 +28,7 @@ class ConnectFour:
         self.moves = []
 
     def is_player_1_turn(self) -> bool:
+        """Returns whether it is player 1's turn."""
         return len(self.moves) % 2 == 0
 
     def record_move(self, x: int, y: int) -> None:
@@ -59,6 +75,7 @@ class ConnectFour:
 
 
 def consecutive_in_list(lst: list, wrap: bool = False) -> Optional[int]:
+    """A helper function checking for four consecutive values of 1 or 2 in a list, and returns that value."""
     grouped_diagonal = [[k, len(list(g))] for k, g in groupby(lst)]
     if wrap:
         grouped_diagonal[-1][1] += grouped_diagonal[0][1]
