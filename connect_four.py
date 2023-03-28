@@ -77,7 +77,7 @@ class ConnectFour:
 def consecutive_in_list(lst: list, wrap: bool = False) -> Optional[int]:
     """A helper function checking for four consecutive values of 1 or 2 in a list, and returns that value."""
     grouped_diagonal = [[k, len(list(g))] for k, g in groupby(lst)]
-    if wrap:
+    if wrap and grouped_diagonal[-1][0] == grouped_diagonal[0][0]:
         grouped_diagonal[-1][1] += grouped_diagonal[0][1]
     if any([i == 1 and n >= 4 for i, n in grouped_diagonal]):
         return 1
