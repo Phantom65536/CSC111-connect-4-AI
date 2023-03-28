@@ -9,14 +9,12 @@ from itertools import groupby
 # @check_contracts
 class ConnectFour:
     """Represents the state of a Connect Four game.
-
     Instance Attributes:
     - board_size: the dimension of the board in (rows, columns), ie (y, x) in coordinates
     - board: a numpy ndarray storing the current board state. Each position stores 0 if the space is unoccupied,
              1 if occupied by player 1 and 2 if occupied by player 2.
     - move_sequence: a list of tuples storing the coordinates of player moves in the format (player_move_y, player_move_x).
     - possible_moves: a list of tuples storing the coordinates of all moves that can be taken in current game state.
-
     Representation Invariants:
     - self.board_size[0] >= 5 and self.board_size[1] >= 5
     - all values in board are either 0, 1 or 2
@@ -49,23 +47,9 @@ class ConnectFour:
         """Returns whether it is player 1's turn."""
         return len(self.move_sequence) % 2 == 0
 
-    # def available_moves(self) -> list[tuple[int, int]]:
-    #     """Return possible moves in (y, x) that can be applied to this game instance."""
-    #     possible_moves = []
-    #     for x in range(self.board_size[1]):
-    #         first_available_y = self.board_size[0]
-    #         for y in range(self.board_size[0] - 1, -1, -1):
-    #             if self.board[y, x] != 0:
-    #                 break
-    #             first_available_y = y
-    #         if first_available_y != self.board_size[0]:
-    #             possible_moves.append((first_available_y, x))
-    #     return possible_moves
-
     def record_move(self, y: int, x: int, forced_move_player: Optional[int] = None) -> None:
         """Records the player move at the specified coordinate, setting the value corresponding to the player number.
         If forced_move_player is not None, a move is placed for this player disregarding whether it is their turn.
-
         Preconditions:
         - 0 <= x < self.board_size[1]
         - 0 <= y < self.board_size[0]
@@ -117,7 +101,7 @@ class ConnectFour:
 def consecutive_in_list(lst: list, wrap: bool = False) -> Optional[int]:
     """A helper function checking for four consecutive values of 1 or 2 in a list, and returns that value."""
     grouped_diagonal = [[k, len(list(g))] for k, g in groupby(lst)]
-    if wrap:
+    if wrap and grouped_diagonal[-1][0] == grouped_diagonal[0][0]:
         grouped_diagonal[-1][1] += grouped_diagonal[0][1]
     if any([i == 1 and n >= 4 for i, n in grouped_diagonal]):
         return 1

@@ -5,6 +5,8 @@ import random
 from python_ta.contracts import check_contracts
 import connect_four
 from typing import Optional
+import csv
+from game_tree import GameTree
 
 
 # @check_contracts
@@ -47,6 +49,115 @@ class Player:
         self.game = game_instance
 
 
+class AIPlayer(Player):
+    """A class representing the AI agent with q-learning player as self.player_number.
+
+    Instance Attributes:
+    - max_explore_prob: max exploration probability
+                        shd be set the same as min_explore_prob when constant explore_prob is desired
+    """
+    complete_tree: GameTree
+    curr_tree: Optional[GameTree]
+
+    initial_q_val: float = 0.0
+    reward: float
+    learning_rate: float
+    discount: float
+
+    exploration_prob: float
+    max_explore_prob: float
+    min_explore_prob: float
+
+    def __init__(self, game_instance: connect_four.ConnectFour, player_number: int, ai_config_file: str,
+                 tree_file: Optional[str] = None) -> None:
+        """Initialize the AI with ai_config_file and possibly retrieve an existing GameTree from tree_file
+
+        Preconditions:
+        - ai_config_file has only one line and is in the format of  reward, learning_rate, discount,
+                                                                    max_explore_prob and min_explore_prob
+        - game_instance is a beginning game state
+        """
+        Player.__init__(self, game_instance, player_number)
+        with open(ai_config_file) as csv_file:
+            reader = list(csv.reader(csv_file))
+            self.reward, self.learning_rate, self.discount, self.max_explore_prob, self.max_explore_prob = \
+                float(reader[0][0]), float(reader[0][1]), float(reader[0][2]), float(reader[0][3]), float(reader[0][4])
+            self.exploration_prob = self.max_explore_prob
+        if tree_file is not None:
+            pass # load tree
+        else:
+            self.complete_tree = GameTree(game_instance, self.initial_q_val, self.reward, self.learning_rate, self.discount)
+        self.curr_tree = self.complete_tree
+
+    def make_move(self, training: bool = False) -> None:
+        """Make a move."""
+        if self.curr_tree is not None and (self.player_number != 1 or self.curr_tree != self.complete_tree):
+            latest_move = self.game.move_sequence[-1]
+            if latest_move in self.curr_tree.get_subtrees():
+                self.curr_tree = self.curr_tree.get_subtrees()[latest_move]
+            elif not training:
+                self.curr_tree = None
+            else:
+                self.curr_tree.add_subtree(self.game, latest_move)
+                self.curr_tree = self.curr_tree.get_subtrees()[latest_move]
+
+        explore_num = random.uniform(0.0, 1.0)
+        if self.curr_tree is None or self.curr_tree.get_subtrees() == {} or (training and explore_num < self.exploration_prob):
+            chosen_action = random.choice(self.game.possible_moves)
+            self.game.record_move(chosen_action[0], chosen_action[1])
+            if training:
+                assert self.curr_tree is not None
+                if chosen_action not in self.curr_tree.get_subtrees():
+                    self.curr_tree.add_subtree(self.game, chosen_action)
+                self.curr_tree = self.curr_tree.get_subtrees()[chosen_action]
+            else:
+                self.curr_tree = None
+
+        else:
+            optimal_actions = []
+            for recorded_move in self.curr_tree.get_subtrees():
+                if optimal_actions == [] or self.curr_tree.get_subtrees()[recorded_move] == self.curr_tree.get_subtrees()[optimal_actions[0]]:
+                    optimal_actions.append(recorded_move)
+                elif self.curr_tree.get_subtrees()[recorded_move] > self.curr_tree.get_subtrees()[optimal_actions[0]]:
+                    optimal_actions = [recorded_move]
+            chosen_action = random.choice(optimal_actions)
+            self.game.record_move(chosen_action[0], chosen_action[1])
+            self.curr_tree = self.curr_tree.get_subtrees()[chosen_action]
+
+    def train(self, num_games: int, opponent: Player) -> None:
+        """Train self to play as self.player_number by playing num_games times with opponent.
+
+        Preconditions:
+        - opponent.player_number != self.player_number
+        - opponent able to choose a move itself/automatically
+        - num_games > 0
+        """
+        for _ in range(num_games):
+            if self.player_number == 1:
+                while self.game.get_winner() is None:
+                    self.make_move(True)
+                    if self.game.get_winner() is not None:
+                        break
+                    opponent.make_move()
+                self.complete_tree.update_q_tables(self.game.move_sequence, 1, self.game.get_winner())
+            else:
+                while self.game.get_winner() is None:
+                    opponent.make_move()
+                    if self.game.get_winner() is not None:
+                        break
+                    self.make_move(True)
+                self.complete_tree.get_subtrees()[self.game.move_sequence[1]].\
+                    update_q_tables(self.game.move_sequence, 2, self.game.get_winner(), 1)
+            new_game = connect_four.ConnectFour(self.game.board_size[0], self.game.board_size[1])
+            self.reset(new_game)
+            opponent.reset(new_game)
+
+    def reset(self, game_instance: connect_four.ConnectFour) -> None:
+        """Reset this player instance to play another game."""
+        Player.reset(self, game_instance)
+        self.curr_tree = self.complete_tree
+
+
 class TrainingAgent(Player):
     """A class representing the training agent in Connect 4. This agent is able to read ahead one move."""
     def make_move(self) -> None:
@@ -57,6 +168,8 @@ class TrainingAgent(Player):
         - (game.is_player_1_turn() and self.player_number == 1) or self.player_number == 2
         - the game is not finished
         """
+        # First iteration, find immediate win
+        # Second iteration, block immeidate win by opponent
         opponent_number = 2 if self.player_number == 1 else 1
         predict_move_order = (self.player_number, opponent_number)
         for i in range(0, 2):
@@ -67,5 +180,7 @@ class TrainingAgent(Player):
                 if future_winner == predict_move_order[i]:
                     self.game.record_move(coordinate[0], coordinate[1])
                     return
+
+        # Choose random action if no immediate win can be done or blocked
         random_move = random.choice(self.game.possible_moves)
         self.game.record_move(random_move[0], random_move[1])

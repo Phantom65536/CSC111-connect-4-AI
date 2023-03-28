@@ -7,14 +7,12 @@ from typing import Optional
 # @check_contracts
 class GameTree:
     """A decision tree for Connect Four moves. Each node in the tree represents a move.
-
     Instance Attributes:
         - board_size: the dimension of the board in (rows, columns), ie (y, x) in coordinates
         - state: current game state storing q-values if position is unoccupied and None if position is occupied
         - initial_q_val: the initial q value of each unoccupied position when a GameTree instance is initialised
         - learning_rate: the learning rate (alpha) of an AI agent in q-learning
         - discount: the discount (gamma) of an AI agent in q-learning
-
     Representation Invariants:
         - board_size[0] >= 5 and board_size[1] >= 5
         - self.reward > 0 and 0 <= self.learning_rate <= 1 and 0 <= self.discount <= 1
@@ -22,7 +20,6 @@ class GameTree:
         - self.state has the same dimension as game.board
     """
     board_size: tuple[int, int]
-    game: connect_four.ConnectFour
     q_values: dict[tuple[int, int], float]
 
     initial_q_val: float
@@ -40,37 +37,30 @@ class GameTree:
     def __init__(self, game_instance: connect_four.ConnectFour, initial_q: float, reward: float, alpha: float, gamma: float) -> None:
         """Initialize a new game tree."""
         self.board_size = game_instance.board_size
-        self.game = game_instance
-        possible_actions = game_instance.possible_moves
         self.q_values = {}
-        for coordinate in possible_actions:
+        for coordinate in game_instance.possible_moves:
             self.q_values[coordinate] = float(initial_q)
         self._subtrees = {}
         self.initial_q_val, self.reward = initial_q, reward
         self.learning_rate, self.discount = alpha, gamma
 
-    def get_subtrees(self) -> list[GameTree]:
+    def get_subtrees(self) -> dict[tuple[int, int], GameTree]:
         """Return the subtrees of this game tree."""
-        return list(self._subtrees.values())
+        return self._subtrees
 
-    def add_subtree(self, move: tuple[int, int]) -> None:
+    def add_subtree(self, game_instance: connect_four.ConnectFour, move: tuple[int, int]) -> None:
         """Add a subtree with the action move applied to this game tree self.
-
         Preconditions:
         - move is in the format (y, x)
         - move not in self._subtrees
         - position of move on game board is unoccupied
         """
-        new_game_instance = self.game.copy()
-        new_game_instance.record_move(move[0], move[1])
-        subtree = GameTree(new_game_instance, self.initial_q_val, self.reward, self.learning_rate, self.discount)
+        subtree = GameTree(game_instance, self.initial_q_val, self.reward, self.learning_rate, self.discount)
         self._subtrees[move] = subtree
 
     def find_subtree_by_move(self, move: tuple[int, int]) -> Optional[GameTree]:
         """Return the subtree corresponding to the given move.
-
         Return None if no subtree corresponds to that move.
-
         Preconditions:
         - move is in the format (y, x)
         """
@@ -81,7 +71,6 @@ class GameTree:
 
     def update_q_tables(self, move_sequence: list[tuple[int, int]], player: int, winner: int, curr_move_index: int = 0) -> None:
         """Update all q values corresponding to the move in move_sequence in the descendants of self
-
         Preconditions:
         - move_sequence depicts all moves from start to end of a game
         - every tuple in move_sequence is in the format (y, x)
