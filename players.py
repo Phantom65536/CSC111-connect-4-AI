@@ -7,6 +7,7 @@ import connect_four
 from typing import Optional
 import csv
 from game_tree import GameTree
+import pickle
 
 
 # @check_contracts
@@ -78,13 +79,15 @@ class AIPlayer(Player):
         - game_instance is a beginning game state
         """
         Player.__init__(self, game_instance, player_number)
-        with open(ai_config_file) as csv_file:
+        with open(f'AI Models/{ai_config_file}') as csv_file:
             reader = list(csv.reader(csv_file))
-            self.reward, self.learning_rate, self.discount, self.max_explore_prob, self.max_explore_prob = \
+            self.reward, self.learning_rate, self.discount, self.max_explore_prob, self.min_explore_prob = \
                 float(reader[0][0]), float(reader[0][1]), float(reader[0][2]), float(reader[0][3]), float(reader[0][4])
             self.exploration_prob = self.max_explore_prob
         if tree_file is not None:
-            pass # load tree
+            tree_file_handler = open(f'AI Models/{tree_file}', 'rb')
+            self.complete_tree = pickle.load(tree_file_handler)
+            tree_file_handler.close()
         else:
             self.complete_tree = GameTree(game_instance, self.initial_q_val, self.reward, self.learning_rate, self.discount)
         self.curr_tree = self.complete_tree
@@ -116,15 +119,15 @@ class AIPlayer(Player):
         else:
             optimal_actions = []
             for recorded_move in self.curr_tree.get_subtrees():
-                if optimal_actions == [] or self.curr_tree.get_subtrees()[recorded_move] == self.curr_tree.get_subtrees()[optimal_actions[0]]:
+                if optimal_actions == [] or self.curr_tree.q_values[recorded_move] == self.curr_tree.q_values[optimal_actions[0]]:
                     optimal_actions.append(recorded_move)
-                elif self.curr_tree.get_subtrees()[recorded_move] > self.curr_tree.get_subtrees()[optimal_actions[0]]:
+                elif self.curr_tree.q_values[recorded_move] > self.curr_tree.q_values[optimal_actions[0]]:
                     optimal_actions = [recorded_move]
             chosen_action = random.choice(optimal_actions)
             self.game.record_move(chosen_action[0], chosen_action[1])
             self.curr_tree = self.curr_tree.get_subtrees()[chosen_action]
 
-    def train(self, num_games: int, opponent: Player) -> None:
+    def train(self, num_games: int, opponent: Player, tree_file_name: str) -> None:
         """Train self to play as self.player_number by playing num_games times with opponent.
 
         Preconditions:
@@ -132,6 +135,9 @@ class AIPlayer(Player):
         - opponent able to choose a move itself/automatically
         - num_games > 0
         """
+        exploration_prob_decay = (self.max_explore_prob - self.min_explore_prob) / num_games
+        results = []
+        stats = {0: 0, 1: 0, 2: 0}
         for _ in range(num_games):
             if self.player_number == 1:
                 while self.game.get_winner() is None:
@@ -139,18 +145,28 @@ class AIPlayer(Player):
                     if self.game.get_winner() is not None:
                         break
                     opponent.make_move()
-                self.complete_tree.update_q_tables(self.game.move_sequence, 1, self.game.get_winner())
+                winner = self.game.get_winner()
+                self.complete_tree.update_q_tables(self.game.move_sequence, 1, winner)
             else:
                 while self.game.get_winner() is None:
                     opponent.make_move()
                     if self.game.get_winner() is not None:
                         break
                     self.make_move(True)
-                self.complete_tree.get_subtrees()[self.game.move_sequence[1]].\
-                    update_q_tables(self.game.move_sequence, 2, self.game.get_winner(), 1)
+                winner = self.game.get_winner()
+                self.complete_tree.get_subtrees()[self.game.move_sequence[0]].\
+                    update_q_tables(self.game.move_sequence, 2, winner, 1)
+            results.append(winner)
+            stats[winner] += 1
+            self.exploration_prob -= exploration_prob_decay
             new_game = connect_four.ConnectFour(self.game.board_size[0], self.game.board_size[1])
             self.reset(new_game)
             opponent.reset(new_game)
+        print(f'draw: {stats[0]} ({stats[0] / num_games * 100}), P1 wins: {stats[1]} ({stats[1] / num_games * 100}),'
+              f' P2 wins: {stats[2]} ({stats[2] / num_games * 100})')
+        tree_file = open(f'AI Models/{tree_file_name}', 'wb')
+        pickle.dump(self.complete_tree, tree_file)
+        tree_file.close()
 
     def reset(self, game_instance: connect_four.ConnectFour) -> None:
         """Reset this player instance to play another game."""
