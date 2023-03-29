@@ -22,6 +22,7 @@ class Player:
 
     Representation Invariants:
     - self.player_number in {1, 2}
+    - self.game must be a beginning game instance, ie nobody has placed their move yet
     """
     player_number: int
     game: connect_four.ConnectFour
@@ -94,6 +95,9 @@ class AIPlayer(Player):
 
     def make_move(self, training: bool = False) -> None:
         """Make a move."""
+
+        # 1) Move self.curr_tree to current valid state for self by (adding and) moving down self.complete_tree
+        #    according to the opponent's move
         if self.curr_tree is not None and (self.player_number != 1 or self.curr_tree != self.complete_tree):
             latest_move = self.game.move_sequence[-1]
             if latest_move in self.curr_tree.get_subtrees():
@@ -104,6 +108,7 @@ class AIPlayer(Player):
                 self.curr_tree.add_subtree(self.game, latest_move)
                 self.curr_tree = self.curr_tree.get_subtrees()[latest_move]
 
+        # 2) Choose a random action and (add and) move along the GameTree if necessary
         explore_num = random.uniform(0.0, 1.0)
         if self.curr_tree is None or self.curr_tree.get_subtrees() == {} or (training and explore_num < self.exploration_prob):
             chosen_action = random.choice(self.game.possible_moves)
@@ -116,6 +121,8 @@ class AIPlayer(Player):
             else:
                 self.curr_tree = None
 
+        # 2) Choose among actions with highest q_value randomly if there are actions recorded in self.curr_tree
+        #    and AI decides to exploit instead of exploring
         else:
             optimal_actions = []
             for recorded_move in self.curr_tree.get_subtrees():
