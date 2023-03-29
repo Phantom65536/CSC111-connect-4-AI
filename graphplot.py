@@ -16,7 +16,7 @@ class GraphPlot:
 
     Representation Invariants:
         - all(num in {0, 1, 2} for num in self.results)
-        - ai_player in {1, 2}
+        - self.ai_player in {1, 2}
     """
     results: list[int]
     ai_player: int
