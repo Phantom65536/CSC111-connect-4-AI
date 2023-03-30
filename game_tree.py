@@ -24,8 +24,6 @@ class GameTree:
 
     initial_q_val: float
     reward: float
-    learning_rate: float
-    discount: float
 
     # Private Instance Attributes:
     #  - _subtrees:
@@ -34,7 +32,7 @@ class GameTree:
     #      are the move coordinates (y, x) and the values are GameTrees.
     _subtrees: dict[tuple[int, int], GameTree]
 
-    def __init__(self, game_instance: connect_four.ConnectFour, initial_q: float, reward: float, alpha: float, gamma: float) -> None:
+    def __init__(self, game_instance: connect_four.ConnectFour, initial_q: float, reward: float) -> None:
         """Initialize a new game tree."""
         self.board_size = game_instance.board_size
         self.q_values = {}
@@ -42,7 +40,6 @@ class GameTree:
             self.q_values[coordinate] = float(initial_q)
         self._subtrees = {}
         self.initial_q_val, self.reward = initial_q, reward
-        self.learning_rate, self.discount = alpha, gamma
 
     def get_subtrees(self) -> dict[tuple[int, int], GameTree]:
         """Return the subtrees of this game tree."""
@@ -50,17 +47,19 @@ class GameTree:
 
     def add_subtree(self, game_instance: connect_four.ConnectFour, move: tuple[int, int]) -> None:
         """Add a subtree with the action move applied to this game tree self.
+
         Preconditions:
         - move is in the format (y, x)
         - move not in self._subtrees
         - position of move on game board is unoccupied
         """
-        subtree = GameTree(game_instance, self.initial_q_val, self.reward, self.learning_rate, self.discount)
+        subtree = GameTree(game_instance, self.initial_q_val, self.reward)
         self._subtrees[move] = subtree
 
     def find_subtree_by_move(self, move: tuple[int, int]) -> Optional[GameTree]:
         """Return the subtree corresponding to the given move.
         Return None if no subtree corresponds to that move.
+
         Preconditions:
         - move is in the format (y, x)
         """
@@ -69,8 +68,10 @@ class GameTree:
         else:
             return None
 
-    def update_q_tables(self, move_sequence: list[tuple[int, int]], player: int, winner: int, curr_move_index: int = 0) -> None:
+    def update_q_tables(self, move_sequence: list[tuple[int, int]], player: int, winner: int, learning_rate: float,
+                        discount: float, curr_move_index: int = 0) -> None:
         """Update all q values corresponding to the move in move_sequence in the descendants of self
+
         Preconditions:
         - move_sequence depicts all moves from start to end of a game
         - every tuple in move_sequence is in the format (y, x)
@@ -87,12 +88,12 @@ class GameTree:
         original_q_value = self.q_values[move_sequence[curr_move_index]]
         if curr_move_index + 2 < len(move_sequence):
             next_state_tree = self._subtrees[move_sequence[curr_move_index]]._subtrees[move_sequence[curr_move_index + 1]]
-            next_state_tree.update_q_tables(move_sequence, player, winner, curr_move_index + 2)
-            self.q_values[move_sequence[curr_move_index]] = (1 - self.learning_rate) * original_q_value + \
-                self.learning_rate * (self.discount * max(next_state_tree.q_values[action] for action in next_state_tree.q_values))
+            next_state_tree.update_q_tables(move_sequence, player, winner, learning_rate, discount, curr_move_index + 2)
+            self.q_values[move_sequence[curr_move_index]] = (1 - learning_rate) * original_q_value + \
+                learning_rate * (discount * max(next_state_tree.q_values[action] for action in next_state_tree.q_values))
         elif winner == player:
-            self.q_values[move_sequence[curr_move_index]] = (1 - self.learning_rate) * original_q_value + self.learning_rate * self.reward
+            self.q_values[move_sequence[curr_move_index]] = (1 - learning_rate) * original_q_value + learning_rate * self.reward
         elif winner + player == 3:
-            self.q_values[move_sequence[curr_move_index]] = (1 - self.learning_rate) * original_q_value + self.learning_rate * -self.reward
+            self.q_values[move_sequence[curr_move_index]] = (1 - learning_rate) * original_q_value + learning_rate * -self.reward
         else:
-            self.q_values[move_sequence[curr_move_index]] = (1 - self.learning_rate) * original_q_value
+            self.q_values[move_sequence[curr_move_index]] = (1 - learning_rate) * original_q_value
