@@ -41,7 +41,7 @@ class GraphPlot:
         3. Number of wins: a bar plot showing the number of wins for player 1 and player 2.
         """
         outcomes = self.results
-        cumulative_win_percentage = [sum(outcomes[0:i]) / i for i in range(1, len(outcomes) + 1)]
+        cumulative_win_percentage = [self.results[0:i].count(1) / i for i in range(1, len(outcomes) + 1)]
         num_of_wins = [self.results.count(1), self.results.count(2), self.results.count(0)]
 
         fig = make_subplots(rows=2, cols=2)
@@ -56,7 +56,7 @@ class GraphPlot:
 
         fig.append_trace(go.Bar(x=['Player 1', 'Player 2', 'Draw'], y=num_of_wins,
                                 text=num_of_wins, textposition='auto',
-                                name='Number of wins for player 1 and 2'), row=1, col=2)
+                                name='Number of wins and draws for player 1 and 2'), row=1, col=2)
 
         fig.update_yaxes(range=[0.0, 1.0], row=2, col=2)
         fig.update_layout(title='Connect 4 Game Results', xaxis_title='Game')
