@@ -1,5 +1,9 @@
+"""Module containing the GameTree class for AIPlayer in players.py"""
+
 from __future__ import annotations
 from python_ta.contracts import check_contracts
+import python_ta
+import doctest
 import connect_four
 from typing import Optional
 
@@ -97,3 +101,13 @@ class GameTree:
             self.q_values[move_sequence[curr_move_index]] = (1 - learning_rate) * original_q_value + learning_rate * -self.reward
         else:
             self.q_values[move_sequence[curr_move_index]] = (1 - learning_rate) * original_q_value
+
+
+if __name__ == '__main__':
+    doctest.testmod()
+    python_ta.check_all(config={
+        'extra-imports': ['connect_four', 'typing'],
+        'disable': ['too-many-nested-blocks', 'too-many-arguments', 'wrong-import-order',
+                    'forbidden-IO-function'],
+        'max-line-length': 150
+    })

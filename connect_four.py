@@ -1,5 +1,9 @@
+"""Module containing the ConnectFour class, which depicts a game state."""
+
 from __future__ import annotations
 from python_ta.contracts import check_contracts
+import python_ta
+import doctest
 import numpy as np
 from numpy import ndarray
 from typing import Optional
@@ -107,3 +111,13 @@ def consecutive_in_list(lst: list, wrap: bool = False) -> Optional[int]:
         return 1
     if any([i == 2 and n >= 4 for i, n in grouped_diagonal]):
         return 2
+
+
+if __name__ == '__main__':
+    # IMPORTANT: for some reasons python ta gives an error and tells us to inform the instructor
+    doctest.testmod()
+    python_ta.check_all(config={
+        'extra-imports': ['numpy', 'itertools', 'typing'],
+        'disable': ['too-many-nested-blocks', 'wrong-import-order'],
+        'max-line-length': 150
+    })

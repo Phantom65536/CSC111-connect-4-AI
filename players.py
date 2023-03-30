@@ -1,8 +1,12 @@
+"""Contains different Player classes."""
+
 from __future__ import annotations
 
-import random
-
+import doctest
 from python_ta.contracts import check_contracts
+import python_ta
+
+import random
 import connect_four
 from typing import Optional
 from game_tree import GameTree
@@ -51,6 +55,7 @@ class Player:
         self.game = game_instance
 
 
+# @check_contracts
 class HumanPlayer(Player):
     """A class representing a human player as self.player_number"""
     def make_move(self, y: int = 0, x: int = 0) -> None:
@@ -64,6 +69,7 @@ class HumanPlayer(Player):
         self.game.record_move(y, x)
 
 
+# @check_contracts
 class AIPlayer(Player):
     """A class representing the AI agent with q-learning player as self.player_number.
 
@@ -147,7 +153,7 @@ class AIPlayer(Player):
             self.game.record_move(chosen_action[0], chosen_action[1])
             self.curr_tree = self.curr_tree.get_subtrees()[chosen_action]
 
-    def play_against(self, num_games: int, opponent: Player,  train: bool = False, tree_file_name: Optional[str] = None,
+    def play_against(self, num_games: int, opponent: Player, train: bool = False, tree_file_name: Optional[str] = None,
                      learning_rate: float = 0.2, discount: float = 0.9, max_explore_rate: float = 1.0,
                      min_explore_rate: float = 0.0) -> None:
         """Train self to play as self.player_number by playing num_games times with opponent.
@@ -205,6 +211,7 @@ class AIPlayer(Player):
         self.curr_tree = self.complete_tree
 
 
+# @check_contracts
 class RandomAgent(Player):
     """A class representing an agent in Connect 4 who is entirely random."""
     def make_move(self) -> None:
@@ -243,3 +250,13 @@ class RandomAgent(Player):
 #         # Choose random action if no immediate win can be done or blocked
 #         random_move = random.choice(self.game.possible_moves)
 #         self.game.record_move(random_move[0], random_move[1])
+
+
+if __name__ == '__main__':
+    doctest.testmod()
+    python_ta.check_all(config={
+        'extra-imports': ['random', 'connect_four', 'game_tree', 'graphplot', 'pickle'],
+        'disable': ['too-many-nested-blocks', 'too-many-locals', 'too-many-arguments', 'wrong-import-order',
+                    'forbidden-IO-function', 'consider-using-with'],
+        'max-line-length': 150
+    })
