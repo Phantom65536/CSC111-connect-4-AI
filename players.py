@@ -225,33 +225,6 @@ class RandomAgent(Player):
         self.game.record_move(random_move[0], random_move[1])
 
 
-# class OneStepAgent(Player):
-#     """A class representing an agent in Connect 4 who can read ahead one move."""
-#     def make_move(self) -> None:
-#         """Make a move in the current game.
-#
-#         Preconditions:
-#         - (game.is_player_1_turn() and self.player_number == 1) or self.player_number == 2
-#         - the game is not finished
-#         """
-#         # First iteration, find immediate win
-#         # Second iteration, block immeidate win by opponent
-#         opponent_number = 2 if self.player_number == 1 else 1
-#         predict_move_order = (self.player_number, opponent_number)
-#         for i in range(0, 2):
-#             for coordinate in self.game.possible_moves:
-#                 game_further_move = self.game.copy()
-#                 game_further_move.record_move(coordinate[0], coordinate[1], predict_move_order[i])
-#                 future_winner = game_further_move.get_winner()
-#                 if future_winner == predict_move_order[i]:
-#                     self.game.record_move(coordinate[0], coordinate[1])
-#                     return
-#
-#         # Choose random action if no immediate win can be done or blocked
-#         random_move = random.choice(self.game.possible_moves)
-#         self.game.record_move(random_move[0], random_move[1])
-
-
 if __name__ == '__main__':
     doctest.testmod()
     python_ta.check_all(config={

@@ -11,17 +11,18 @@ from typing import Optional
 # @check_contracts
 class GameTree:
     """A decision tree for Connect Four moves. Each node in the tree represents a move.
+
     Instance Attributes:
         - board_size: the dimension of the board in (rows, columns), ie (y, x) in coordinates
-        - state: current game state storing q-values if position is unoccupied and None if position is occupied
+        - q_values: a dict mapping each potential move to a corresponding q-value of that action
         - initial_q_val: the initial q value of each unoccupied position when a GameTree instance is initialised
-        - learning_rate: the learning rate (alpha) of an AI agent in q-learning
-        - discount: the discount (gamma) of an AI agent in q-learning
+        - reward: the value of the reward when AIAgent wins a game
+
     Representation Invariants:
-        - board_size[0] >= 5 and board_size[1] >= 5
-        - self.reward > 0 and 0 <= self.learning_rate <= 1 and 0 <= self.discount <= 1
-        - all None values in self.state corresponds to the occupied positions in game.board
-        - self.state has the same dimension as game.board
+        - self.board_size[0] >= 5 and self.board_size[1] >= 5
+        - self.reward > 0
+        - all(move in self.q_values for move in self._subtrees)
+        - all keys in self.q_values and self._subtrees are valid and available moves in the format (y, x)
     """
     board_size: tuple[int, int]
     q_values: dict[tuple[int, int], float]
@@ -86,7 +87,7 @@ class GameTree:
         - if winner is 0 it means the game ends in a tie
         - player in {1, 2}
         - player indicates whether AI agent is player 1 or 2
-        - self is a state for player
+        - self is a valid state for player
         - move_sequence[curr_move_index] in self.q_values
         """
         original_q_value = self.q_values[move_sequence[curr_move_index]]

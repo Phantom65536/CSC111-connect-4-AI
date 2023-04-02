@@ -13,18 +13,20 @@ from itertools import groupby
 # @check_contracts
 class ConnectFour:
     """Represents the state of a Connect Four game.
+
     Instance Attributes:
     - board_size: the dimension of the board in (rows, columns), ie (y, x) in coordinates
     - board: a numpy ndarray storing the current board state. Each position stores 0 if the space is unoccupied,
              1 if occupied by player 1 and 2 if occupied by player 2.
     - move_sequence: a list of tuples storing the coordinates of player moves in the format (player_move_y, player_move_x).
     - possible_moves: a list of tuples storing the coordinates of all moves that can be taken in current game state.
+
     Representation Invariants:
     - self.board_size[0] >= 5 and self.board_size[1] >= 5
     - all values in board are either 0, 1 or 2
     - all(0 <= move[0] < self.board_size[0] and 0 <= move[1] < self.board_size[1] for move in self.move_sequence)
     - all(0 <= move[0] < self.board_size[0] and 0 <= move[1] < self.board_size[1] for move in self.possible_moves)
-    - all tuples in self.moves are unique
+    - all tuples in self.move_sequence and self.possible_moves are unique
     """
     board_size: tuple[int, int]
     board: ndarray
@@ -53,12 +55,12 @@ class ConnectFour:
 
     def record_move(self, y: int, x: int, forced_move_player: Optional[int] = None) -> None:
         """Records the player move at the specified coordinate, setting the value corresponding to the player number.
-        If forced_move_player is not None, a move is placed for this player disregarding whether it is their turn.
+        If forced_move_player is not None, a move is placed for this player disregarding whether it is their turn or not.
         Preconditions:
         - 0 <= x < self.board_size[1]
         - 0 <= y < self.board_size[0]
         - self.board[y, x] == 0
-        - (y, x) in self.available_moves()
+        - (y, x) in self.possible_moves
         - forced_move_player in {1, 2, None}
         """
         if forced_move_player is not None:

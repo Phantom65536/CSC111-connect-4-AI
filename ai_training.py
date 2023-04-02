@@ -65,7 +65,6 @@ def train_p2_ai_against_p1_ai(p1_ai: AIPlayer, generate: bool = False) -> AIPlay
 
     Preconditions:
     - P1_ai.player_number == 1 and P2_ai.player_number == 2
-    - not generate or p2_ai is not None
     """
     # Train P2 AI against P1 AI
     g = connect_four.ConnectFour(5, 5)
@@ -99,8 +98,8 @@ def run_games() -> None:
     short_demo()
 
     # See performance between different Players
-    # to train the AI models, change the parameters to True (for the last one just comment out the last statement)
-    # WARNING: it takes ~30s for EACH of the AI models to be loaded
+    # to train the AI models, change the parameters to True
+    # WARNING: it takes 15-30s for EACH of the AI models to be loaded
     ai1 = train_p1_against_rand_p2(False)
     ai2 = train_p2_against_rand_p1(False)
     compare_p1_p2_ai(ai1, ai2)
