@@ -12,10 +12,6 @@ import connect_four
 import graphplot
 
 
-# COL = 7
-# ROW = 6
-
-
 class GameInterface:
     """
     A GameInterface class where the current game is displayed using the information from the Game class
