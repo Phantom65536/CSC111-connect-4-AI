@@ -8,6 +8,7 @@ import numpy as np
 from numpy import ndarray
 from typing import Optional
 from itertools import groupby
+import pygame
 
 
 # @check_contracts
@@ -99,6 +100,12 @@ class ConnectFour:
         # check draw
         if self.possible_moves == []:
             return 0
+
+    def get_gameboard(self) -> ndarray:
+        """
+        Returns the current game board as a ndarray.
+        """
+        return self.board
 
 
 # @check_contracts
