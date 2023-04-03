@@ -74,12 +74,10 @@ class GameInterface:
             for row in range(0, self.row):
                 if board[row][col] == 1:
                     # player 1, red circle
-                    # pygame.draw.circle(screen, (255, 0, 0), (int(col * 100 + 50), int((row + 1) * 100 + 50)), 45)
                     pygame.draw.circle(self.screen, (255, 0, 0), (int(col * 100 + 50), 600 - int(row * 100 + 50)), 45)
 
                 elif board[row][col] == 2:
                     # player 2, yellow circle
-                    # pygame.draw.circle(screen, (255, 255, 0), (int(col * 100 + 50), int((row + 1) * 100 + 50)), 45)
                     pygame.draw.circle(self.screen, (255, 255, 0), (int(col * 100 + 50), 600 - int(row * 100 + 50)), 45)
         pygame.display.update()
 
@@ -98,11 +96,12 @@ if __name__ == '__main__':
     import doctest
 
     doctest.testmod(verbose=True)
-    # import python_ta
+    import python_ta
 
-    # python_ta.check_all(config={
-    #     'extra-imports': ['pygame', 'numpy', 'sys', 'math', 'connect_four', 'graphplot'],
-    #     'allowed-io': ['run_games'],  # the names (strs) of functions that call print/open/input
-    #     'disable': ['too-many-nested-blocks'],
-    #     'max-line-length': 120
-    # })
+    python_ta.check_all(config={
+        'extra-imports': ['pygame', 'numpy', 'sys', 'math', 'connect_four', 'graphplot'],
+        'allowed-io': ['run_games'],  # the names (strs) of functions that call print/open/input
+        'disable': ['too-many-nested-blocks'],
+        'max-line-length': 120
+    })
+
