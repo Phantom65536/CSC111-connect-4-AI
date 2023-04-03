@@ -4,12 +4,10 @@ Game Interface class
 from __future__ import annotations
 from typing import Optional, Any
 
-import sys
 import math
 import pygame
 import numpy as np
 import connect_four
-import graphplot
 
 
 class GameInterface:
@@ -82,7 +80,7 @@ class GameInterface:
                 elif board[row][col] == 2:
                     # player 2, yellow circle
                     # pygame.draw.circle(screen, (255, 255, 0), (int(col * 100 + 50), int((row + 1) * 100 + 50)), 45)
-                    pygame.draw.circle(self.screen, (255, 255, 0), (int(col * 100 + 50), 600-int(row * 100 + 50)), 45)
+                    pygame.draw.circle(self.screen, (255, 255, 0), (int(col * 100 + 50), 600 - int(row * 100 + 50)), 45)
         pygame.display.update()
 
 
