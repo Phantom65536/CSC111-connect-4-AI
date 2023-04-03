@@ -35,10 +35,12 @@ def runner() -> connect_four.ConnectFour:
     gboard.draw_board(game.board)
     turns = get_human_turn()
     human = HumanPlayer(game, turns[0])
+    print('Loading model...')
     if turns[1] == 1:
-        ai = AIPlayer(game, 1, 'AI Models/5x5_tree_randagent_P1')
+        ai = AIPlayer(game, 1, '5x5_tree_randagent_P1')
     else:
-        ai = AIPlayer(game, 2, 'AI Models/5x5_tree_randagent_P2')
+        ai = AIPlayer(game, 2, '5x5_tree_randagent_P2')
+    print('Model loaded!')
 
     while game.get_winner() is None:
 
@@ -62,3 +64,7 @@ def runner() -> connect_four.ConnectFour:
 
     print(f'Winner: {game.get_winner()}')
     return game
+
+
+if __name__ == '__main__':
+    runner()

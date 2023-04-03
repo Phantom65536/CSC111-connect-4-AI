@@ -86,39 +86,6 @@ class GameInterface:
         pygame.display.update()
 
 
-# def run_game() -> connect_four.ConnectFour:
-#     """
-#     Run one Connect4 game between player 1 and player 2.
-#     Return the ConnectFour instance after the game is complete.
-#     """
-#     size = (500, 500)
-#     gboard = GameInterface(5, 5)
-#     screen = pygame.display.set_mode(size)
-#     pygame.display.update()
-#     game = connect_four.ConnectFour(5, 5)
-#     gboard.draw_board(game.board, screen)
-#
-#     while game.get_winner() is None:
-#         for event in pygame.event.get():
-#             # if event.type is pygame.QUIT
-#             if event.type == 256:
-#                 sys.exit()
-#             # if event.type is pygame.MOUSEBUTTONDOWN
-#             elif event.type == 1025:
-#                 if game.is_player_1_turn():
-#                     x = event.pos[0]
-#                     handle_move(x, gboard, game, 1)
-#                 else:
-#                     x = event.pos[0]
-#                     handle_move(x, gboard, game, 2)
-#
-#                 gboard.draw_board(game.board, screen)
-#
-#     assert game.get_winner() is not None
-#
-#     return game
-#
-
 def handle_move(x: Any, board: GameInterface, game: connect_four.ConnectFour, player: int) -> None:
     """
     Helper function to handle a move by either player 1 or player 2.
@@ -127,38 +94,6 @@ def handle_move(x: Any, board: GameInterface, game: connect_four.ConnectFour, pl
     row_num = board.get_next_open_row(game.board, col_num)
     board.drop_piece(game.board, row_num, col_num, player)
     game.record_move(col_num, row_num)
-
-
-# def run_games(num_games: int, ai: int, print_game: bool = True, show_stats: bool = False) -> dict[str, int]:
-#     """
-#     Run num_games Connect4 game between player 1 and player 2.
-#
-#     Optional arguments:
-#         - print_game: print a record of each game (default: True)
-#         - show_stats: use GraphPlot to display statistics for the game runs (default: False)
-#
-#     Preconditions:
-#         - num_games >= 1
-#     """
-#     stats = {'1': 0, '2': 0}
-#     results = []
-#     for i in range(0, num_games):
-#         game = run_game()
-#         winner = game.get_winner()
-#         stats[winner] += 1
-#         results.append(winner)
-#
-#         if print_game:
-#             print(f'Game {i} winner: {winner}.')
-#
-#     for outcome in stats:
-#         print(f'{outcome}: {stats[outcome]}/{num_games} ({100.0 * stats[outcome] / num_games:.2f}%)')
-#
-#     if show_stats:
-#         resultsg = graphplot.GraphPlot(results, ai)
-#         resultsg.plot_game_stats()
-#
-#     return stats
 
 
 if __name__ == '__main__':
